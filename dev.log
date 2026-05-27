@@ -2,19 +2,18 @@
 > leads-crm@0.1.0 dev
 > next dev
 
-⚠ Port 3000 is in use by process 7792, using available port 3001 instead.
+⚠ Port 3000 is in use by process 43360, using available port 3001 instead.
 ▲ Next.js 16.2.6 (Turbopack)
 - Local:         http://localhost:3001
 - Network:       http://192.168.1.60:3001
 - Environments: .env.local
-✓ Ready in 395ms
+✓ Ready in 387ms
 ⨯ Another next dev server is already running.
 
 - Local:        http://localhost:3000
-- PID:          7792
-- Dir:          C:\Users\keren\OneDrive\Do[?25h
-\AI\פרויקטים\מערכת לידים קאש פלואו\leads-crm
+- PID:          43360
+- Dir:          C:\Users\keren\OneDrive\Documents\AI\פרויקטים\מערכת לידים קאש פלואו\leads-crm
 - Log:          .next\dev\logs\next-development.log
 
-Run taskkill /PID 7792 /F to stop it.
+Run taskkill /PID 43360 /F to stop it.
 [?25h
