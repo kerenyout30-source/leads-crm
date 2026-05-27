@@ -17,12 +17,17 @@ export async function createLead(data: Omit<Lead, 'id' | 'created_at' | 'user_id
 
   if (error) throw new Error(error.message)
 
-  await supabase.from('lead_activities').insert({
-    lead_id: lead.id,
-    user_id: user.id,
-    type: 'lead_created',
-    payload: {},
-  })
+  // Log activity (don't fail if this errors - activities are secondary)
+  try {
+    await supabase.from('lead_activities').insert({
+      lead_id: lead.id,
+      user_id: user.id,
+      type: 'lead_created',
+      payload: {},
+    })
+  } catch (e) {
+    console.error('Failed to log lead creation activity:', e)
+  }
 
   revalidatePath('/leads')
   revalidatePath('/')
@@ -42,19 +47,24 @@ export async function updateLead(
     .from('leads')
     .update(data)
     .eq('id', id)
+    .eq('user_id', user.id)
 
   if (error) throw new Error(error.message)
 
-  // Log each changed field as an activity
+  // Log each changed field as an activity (don't fail if this errors)
   if (changedFields.length > 0) {
-    await supabase.from('lead_activities').insert(
-      changedFields.map(f => ({
-        lead_id: id,
-        user_id: user.id,
-        type: f.field === 'status' ? 'status_change' : 'field_updated',
-        payload: { field: f.field, old_value: f.old_value, new_value: f.new_value },
-      }))
-    )
+    try {
+      await supabase.from('lead_activities').insert(
+        changedFields.map(f => ({
+          lead_id: id,
+          user_id: user.id,
+          type: f.field === 'status' ? 'status_change' : 'field_updated',
+          payload: { field: f.field, old_value: f.old_value, new_value: f.new_value },
+        }))
+      )
+    } catch (e) {
+      console.error('Failed to log lead update activity:', e)
+    }
   }
 
   revalidatePath('/leads')
@@ -66,7 +76,12 @@ export async function deleteLead(id: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
-  const { error } = await supabase.from('leads').delete().eq('id', id)
+  const { error } = await supabase
+    .from('leads')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id)
+
   if (error) throw new Error(error.message)
 
   revalidatePath('/leads')
