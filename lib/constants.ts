@@ -23,4 +23,4 @@ export const STATUS_MAP = Object.fromEntries(
 
 export const SOURCE_MAP = Object.fromEntries(
   SOURCE_OPTIONS.map(s => [s.value, s])
-) as Record<Source, typeof SOURCE_OPTIONS[0]>
+) as Record<Source, { value: Source; label: string }>
