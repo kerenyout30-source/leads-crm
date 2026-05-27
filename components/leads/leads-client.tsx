@@ -29,7 +29,7 @@ export function LeadsClient({ initialLeads }: Props) {
         (l.organization ?? '').includes(search)
 
       let matchStatus = statusFilter === 'all' || l.status === statusFilter
-      let matchSource = sourceFilter === 'all' || l.source === sourceFilter
+      const matchSource = sourceFilter === 'all' || l.source === sourceFilter
 
       if (activePreset === 'לידים פעילים') {
         matchStatus = ['new', 'in_progress', 'details_sent'].includes(l.status)
@@ -40,7 +40,7 @@ export function LeadsClient({ initialLeads }: Props) {
 
       return matchSearch && matchStatus && matchSource
     })
-  }, [leads, search, statusFilter, sourceFilter, activePreset])
+  }, [leads, search, statusFilter, sourceFilter, activePreset, startOfMonth])
 
   function handleEdit(lead: Lead) {
     setEditingLead(lead)
