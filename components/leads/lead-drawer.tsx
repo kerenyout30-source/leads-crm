@@ -36,24 +36,35 @@ export function LeadDrawer({ open, onClose, lead, onSaved, onDeleted }: Props) {
   async function handleSubmit(values: LeadFormValues) {
     setLoading(true)
     try {
+      // Normalize form values to match Lead type (empty string -> null)
+      const normalizedValues = {
+        ...values,
+        phone: values.phone || null,
+        email: values.email || null,
+        role_title: values.role_title || null,
+        organization: values.organization || null,
+        source: values.source || null,
+        notes: values.notes || null,
+      }
+
       if (lead) {
         // Track changed fields
         const changedFields = (Object.keys(values) as (keyof LeadFormValues)[])
           .filter(
             (k) =>
-              String(values[k] ?? '') !== String((lead as any)[k] ?? '')
+              String(values[k] ?? '') !== String(lead[k] ?? '')
           )
           .map((k) => ({
             field: k,
-            old_value: String((lead as any)[k] ?? ''),
+            old_value: String(lead[k] ?? ''),
             new_value: String(values[k] ?? ''),
           }))
 
-        await updateLead(lead.id, values, changedFields)
-        onSaved({ ...lead, ...values } as Lead)
+        await updateLead(lead.id, normalizedValues, changedFields)
+        onSaved({ ...lead, ...normalizedValues } as Lead)
         toast.success('הליד עודכן בהצלחה')
       } else {
-        const created = await createLead(values)
+        const created = await createLead(normalizedValues)
         onSaved(created)
         toast.success('ליד חדש נוצר בהצלחה')
       }

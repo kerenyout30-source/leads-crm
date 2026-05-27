@@ -5,6 +5,7 @@ import { LeadsToolbar } from './leads-toolbar'
 import { LeadsTable } from './leads-table'
 import { LeadsKanban } from './leads-kanban'
 import { LeadDrawer } from './lead-drawer'
+import { ImportModal } from './import-modal'
 import type { Lead } from '@/lib/types'
 import * as XLSX from 'xlsx'
 
@@ -19,6 +20,7 @@ export function LeadsClient({ initialLeads }: Props) {
   const [view, setView] = useState<'table' | 'kanban'>('table')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [editingLead, setEditingLead] = useState<Lead | null>(null)
+  const [importOpen, setImportOpen] = useState(false)
 
   const now = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -83,7 +85,7 @@ export function LeadsClient({ initialLeads }: Props) {
         view={view} onViewChange={setView}
         onAddNew={handleAddNew}
         onExport={handleExport}
-        onImport={() => {}}
+        onImport={() => setImportOpen(true)}
       />
 
       {view === 'table'
@@ -111,6 +113,12 @@ export function LeadsClient({ initialLeads }: Props) {
           setLeads(prev => prev.filter(l => l.id !== id))
           setDrawerOpen(false)
         }}
+      />
+
+      <ImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={(newLeads) => setLeads(prev => [...newLeads, ...prev])}
       />
     </div>
   )
