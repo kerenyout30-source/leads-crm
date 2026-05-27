@@ -9,5 +9,8 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 }
 
 export function createClient() {
-  return createBrowserClient(SUPABASE_URL, SUPABASE_KEY)
+  return createBrowserClient(
+    SUPABASE_URL as string,
+    SUPABASE_KEY as string
+  )
 }
