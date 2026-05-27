@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { LeadsToolbar } from './leads-toolbar'
 import { LeadsTable } from './leads-table'
+import { LeadsKanban } from './leads-kanban'
 import { LeadDrawer } from './lead-drawer'
 import type { Lead } from '@/lib/types'
 import * as XLSX from 'xlsx'
@@ -87,7 +88,11 @@ export function LeadsClient({ initialLeads }: Props) {
 
       {view === 'table'
         ? <LeadsTable leads={filtered} onEdit={handleEdit} />
-        : <div className="text-muted-foreground text-sm p-4">קנבן — ראה Task 9</div>
+        : <LeadsKanban
+            leads={filtered}
+            onEdit={handleEdit}
+            onLeadsChange={setLeads}
+          />
       }
 
       <LeadDrawer
