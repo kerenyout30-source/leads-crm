@@ -4,6 +4,16 @@ import { useState } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { LeadForm, type LeadFormValues } from './lead-form'
 import { LeadTimeline } from './lead-timeline'
 import { createLead, updateLead, deleteLead } from '@/actions/leads'
@@ -21,6 +31,7 @@ type Props = {
 
 export function LeadDrawer({ open, onClose, lead, onSaved, onDeleted }: Props) {
   const [loading, setLoading] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
 
   async function handleSubmit(values: LeadFormValues) {
     setLoading(true)
@@ -38,11 +49,11 @@ export function LeadDrawer({ open, onClose, lead, onSaved, onDeleted }: Props) {
             new_value: String(values[k] ?? ''),
           }))
 
-        await updateLead(lead.id, values as any, changedFields)
+        await updateLead(lead.id, values, changedFields)
         onSaved({ ...lead, ...values } as Lead)
         toast.success('הליד עודכן בהצלחה')
       } else {
-        const created = await createLead(values as any)
+        const created = await createLead(values)
         onSaved(created)
         toast.success('ליד חדש נוצר בהצלחה')
       }
@@ -55,7 +66,6 @@ export function LeadDrawer({ open, onClose, lead, onSaved, onDeleted }: Props) {
 
   async function handleDelete() {
     if (!lead) return
-    if (!confirm('למחוק את הליד לצמיתות?')) return
     setLoading(true)
     try {
       await deleteLead(lead.id)
@@ -66,6 +76,7 @@ export function LeadDrawer({ open, onClose, lead, onSaved, onDeleted }: Props) {
       toast.error('שגיאה במחיקה: ' + e.message)
     } finally {
       setLoading(false)
+      setDeleteConfirmOpen(false)
     }
   }
 
@@ -97,15 +108,38 @@ export function LeadDrawer({ open, onClose, lead, onSaved, onDeleted }: Props) {
                 onSubmit={handleSubmit}
                 loading={loading}
               />
-              <Button
-                variant="destructive"
-                size="sm"
-                className="w-full mt-3 gap-1"
-                onClick={handleDelete}
-                disabled={loading}
+              <AlertDialog
+                open={deleteConfirmOpen}
+                onOpenChange={setDeleteConfirmOpen}
               >
-                <Trash2 className="h-3.5 w-3.5" /> מחק ליד
-              </Button>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="w-full mt-3 gap-1"
+                    disabled={loading}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> מחק ליד
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>למחוק את הליד?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      פעולה זו לא ניתנת לביטול. הליד יימחק לצמיתות.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <div className="flex gap-2 justify-end">
+                    <AlertDialogCancel>בטל</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      className="bg-destructive hover:bg-destructive/90"
+                    >
+                      מחק
+                    </AlertDialogAction>
+                  </div>
+                </AlertDialogContent>
+              </AlertDialog>
             </TabsContent>
             <TabsContent value="timeline">
               <LeadTimeline leadId={lead.id} />

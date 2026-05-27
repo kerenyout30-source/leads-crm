@@ -57,7 +57,6 @@ export function LeadForm({ defaultValues, onSubmit, loading }: Props) {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
     setValue,
   } = useForm<LeadFormValues>({
     resolver: zodResolver(schema),
@@ -73,9 +72,6 @@ export function LeadForm({ defaultValues, onSubmit, loading }: Props) {
       ...defaultValues,
     },
   })
-
-  const status = watch('status')
-  const source = watch('source')
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -126,7 +122,6 @@ export function LeadForm({ defaultValues, onSubmit, loading }: Props) {
         <FormItem>
           <FormLabel>סטטוס</FormLabel>
           <Select
-            value={status}
             onValueChange={(value) =>
               setValue('status', value as LeadFormValues['status'])
             }
@@ -146,7 +141,6 @@ export function LeadForm({ defaultValues, onSubmit, loading }: Props) {
         <FormItem>
           <FormLabel>מקור</FormLabel>
           <Select
-            value={source || ''}
             onValueChange={(value) =>
               setValue('source', value === '' ? '' : (value as LeadFormValues['source']))
             }
