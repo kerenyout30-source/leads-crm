@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ModeToggle } from '@/components/mode-toggle'
 
 export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null)
@@ -24,7 +25,10 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-background relative">
+      <div className="absolute top-4 right-4">
+        <ModeToggle />
+      </div>
       <Card className="w-full max-w-sm">
         <CardHeader className="flex flex-col items-center gap-2">
           <Image

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ModeToggle } from '@/components/mode-toggle'
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
@@ -27,7 +28,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-background relative">
+      <div className="absolute top-4 right-4">
+        <ModeToggle />
+      </div>
       <Card className="w-full max-w-sm">
         <CardHeader className="flex flex-col items-center gap-2">
           <Image
@@ -59,9 +63,12 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'מתחבר...' : 'התחבר'}
             </Button>
-            <div className="text-center">
-              <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-foreground">
+            <div className="flex items-center justify-between text-sm">
+              <Link href="/forgot-password" className="text-muted-foreground hover:text-foreground">
                 שכחת סיסמה?
+              </Link>
+              <Link href="/signup" className="text-muted-foreground hover:text-foreground">
+                אין לך חשבון? הירשם
               </Link>
             </div>
           </form>

@@ -49,6 +49,39 @@ export async function signOut() {
   redirect('/login')
 }
 
+export async function signUp(formData: FormData) {
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  const confirm = formData.get('confirm') as string
+
+  if (!email || !password) {
+    return { error: 'יש למלא אימייל וסיסמה' }
+  }
+  if (password.length < 6) {
+    return { error: 'הסיסמה חייבת להיות באורך 6 תווים לפחות' }
+  }
+  if (password !== confirm) {
+    return { error: 'הסיסמאות אינן תואמות' }
+  }
+
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signUp({ email, password })
+
+  if (error) {
+    console.error('[Auth] signUp failed:', { email, code: error.code, message: error.message })
+    return { error: mapAuthError(error.code, error.message) }
+  }
+
+  // If email confirmation is enabled in Supabase, no session is returned yet
+  if (!data.session) {
+    return { success: 'נשלח אימייל לאישור החשבון. בדקי גם בתיקיית הספאם.' }
+  }
+
+  // Otherwise the user is logged in - redirect to dashboard
+  revalidatePath('/', 'layout')
+  redirect('/')
+}
+
 export async function forgotPassword(formData: FormData) {
   const email = formData.get('email') as string
   if (!email) return { error: 'יש להזין כתובת אימייל' }
