@@ -65,7 +65,18 @@ export async function signUp(formData: FormData) {
   }
 
   const supabase = await createClient()
-  const { data, error } = await supabase.auth.signUp({ email, password })
+  const headersList = await headers()
+  const host = headersList.get('host')
+  const protocol = headersList.get('x-forwarded-proto') ?? 'http'
+  const origin = `${protocol}://${host}`
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback?next=/`,
+    },
+  })
 
   if (error) {
     console.error('[Auth] signUp failed:', { email, code: error.code, message: error.message })
