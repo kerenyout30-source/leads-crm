@@ -43,11 +43,12 @@ export async function updateLead(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
+  // Team-shared CRM: any authenticated user can update any lead.
+  // RLS in Supabase enforces that only authenticated users can perform this action.
   const { error } = await supabase
     .from('leads')
     .update(data)
     .eq('id', id)
-    .eq('user_id', user.id)
 
   if (error) throw new Error(error.message)
 
@@ -76,11 +77,11 @@ export async function deleteLead(id: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
+  // Team-shared CRM: any authenticated user can delete any lead.
   const { error } = await supabase
     .from('leads')
     .delete()
     .eq('id', id)
-    .eq('user_id', user.id)
 
   if (error) throw new Error(error.message)
 
