@@ -78,7 +78,7 @@ export function LeadsClient({ initialLeads }: Props) {
       'תאריך לחזור': l.follow_up_date ?? '',
       'גודל המוסד': l.institution_size ?? '',
       הערות: l.notes ?? '',
-      תאריך: new Date(l.created_at).toLocaleDateString('he-IL'),
+      'תאריך יצירה': new Date(l.created_at).toLocaleDateString('he-IL'),
     }))
     const ws = XLSX.utils.json_to_sheet(rows)
     const wb = XLSX.utils.book_new()

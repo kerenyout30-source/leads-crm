@@ -16,7 +16,7 @@ export function RecentLeadsTable({ leads }: { leads: Lead[] }) {
               <th className="text-right pb-2 font-medium">שם</th>
               <th className="text-right pb-2 font-medium">מוסד</th>
               <th className="text-right pb-2 font-medium">סטטוס</th>
-              <th className="text-right pb-2 font-medium">תאריך</th>
+              <th className="text-right pb-2 font-medium">תאריך יצירה</th>
             </tr>
           </thead>
           <tbody>

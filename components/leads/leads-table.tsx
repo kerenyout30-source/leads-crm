@@ -41,7 +41,7 @@ const columns: ColumnDef<Lead>[] = [
       return <span className={cn('text-xs', overdue ? 'text-red-600 dark:text-red-400 font-medium' : 'text-muted-foreground')}>{text}</span>
     }
   },
-  { accessorKey: 'created_at',   header: 'תאריך',  cell: ({ row }) => <span className="text-muted-foreground text-xs">{new Date(row.original.created_at).toLocaleDateString('he-IL')}</span> },
+  { accessorKey: 'created_at',   header: 'תאריך יצירה',  cell: ({ row }) => <span className="text-muted-foreground text-xs">{new Date(row.original.created_at).toLocaleDateString('he-IL')}</span> },
   { id: 'actions', cell: () => null },
 ]
 
