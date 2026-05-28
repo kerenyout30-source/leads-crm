@@ -3,27 +3,25 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
-import { signIn } from '@/actions/auth'
+import { forgotPassword } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const searchParams = useSearchParams()
-  const resetSuccess = searchParams.get('reset') === 'success'
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
     setError(null)
-    const result = await signIn(formData)
-    if (result?.error) {
-      setError(result.error)
-      setLoading(false)
-    }
+    setSuccess(null)
+    const result = await forgotPassword(formData)
+    if (result?.error) setError(result.error)
+    if (result?.success) setSuccess(result.success)
+    setLoading(false)
   }
 
   return (
@@ -33,35 +31,29 @@ export default function LoginPage() {
           <Image
             src="/logo.png"
             alt="Cashflow"
-            width={120}
-            height={120}
-            className="rounded-lg bg-white p-2"
-            priority
+            width={80}
+            height={80}
+            className="rounded-lg bg-white p-1.5"
           />
-          <CardTitle className="text-center text-xl">מערכת ניהול לידים</CardTitle>
+          <CardTitle className="text-center text-xl">איפוס סיסמה</CardTitle>
         </CardHeader>
         <CardContent>
           <form action={handleSubmit} className="space-y-4">
-            {resetSuccess && (
-              <p className="text-sm text-green-500 text-center">
-                הסיסמה אופסה בהצלחה! התחברי עם הסיסמה החדשה.
-              </p>
-            )}
+            <p className="text-sm text-muted-foreground">
+              הזיני את כתובת האימייל שלך ונשלח אלייך קישור לאיפוס הסיסמה.
+            </p>
             <div className="space-y-2">
               <Label htmlFor="email">אימייל</Label>
               <Input id="email" name="email" type="email" required placeholder="your@email.com" dir="ltr" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">סיסמה</Label>
-              <Input id="password" name="password" type="password" required dir="ltr" />
-            </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
+            {success && <p className="text-sm text-green-500">{success}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'מתחבר...' : 'התחבר'}
+              {loading ? 'שולח...' : 'שלח קישור לאיפוס'}
             </Button>
             <div className="text-center">
-              <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-foreground">
-                שכחת סיסמה?
+              <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
+                חזרה להתחברות
               </Link>
             </div>
           </form>

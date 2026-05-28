@@ -1,9 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { signOut } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
+import { ModeToggle } from '@/components/mode-toggle'
 import { cn } from '@/lib/utils'
 
 const NAV_LINKS = [
@@ -17,7 +19,17 @@ export function Navbar({ userEmail }: { userEmail: string }) {
   return (
     <nav className="border-b border-border bg-card">
       <div className="mx-auto max-w-7xl px-4 h-14 flex items-center justify-between">
-        <span className="font-bold text-foreground">📊 מערכת לידים</span>
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/logo.png"
+            alt="Cashflow"
+            width={36}
+            height={36}
+            className="rounded-md bg-white p-0.5"
+            priority
+          />
+          <span className="font-bold text-foreground hidden sm:inline">Cashflow</span>
+        </Link>
 
         <div className="flex gap-6">
           {NAV_LINKS.map(link => (
@@ -37,6 +49,7 @@ export function Navbar({ userEmail }: { userEmail: string }) {
         </div>
 
         <div className="flex items-center gap-3">
+          <ModeToggle />
           <span className="text-xs text-muted-foreground hidden sm:block">{userEmail}</span>
           <form action={signOut}>
             <Button variant="ghost" size="sm" type="submit">יציאה</Button>

@@ -12,7 +12,6 @@ import {
   AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { LeadForm, type LeadFormValues } from './lead-form'
 import { LeadTimeline } from './lead-timeline'
@@ -45,6 +44,13 @@ export function LeadDrawer({ open, onClose, lead, onSaved, onDeleted }: Props) {
         organization: values.organization || null,
         source: values.source || null,
         notes: values.notes || null,
+        city: values.city || null,
+        assigned_rep: values.assigned_rep || null,
+        interest_level: values.interest_level || null,
+        follow_up_date: values.follow_up_date || null,
+        institution_size: values.institution_size
+          ? Number(values.institution_size)
+          : null,
       }
 
       if (lead) {
@@ -119,20 +125,19 @@ export function LeadDrawer({ open, onClose, lead, onSaved, onDeleted }: Props) {
                 onSubmit={handleSubmit}
                 loading={loading}
               />
+              <Button
+                variant="destructive"
+                size="sm"
+                className="w-full mt-3 gap-1"
+                disabled={loading}
+                onClick={() => setDeleteConfirmOpen(true)}
+              >
+                <Trash2 className="h-3.5 w-3.5" /> מחק ליד
+              </Button>
               <AlertDialog
                 open={deleteConfirmOpen}
                 onOpenChange={setDeleteConfirmOpen}
               >
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="w-full mt-3 gap-1"
-                    disabled={loading}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" /> מחק ליד
-                  </Button>
-                </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>למחוק את הליד?</AlertDialogTitle>

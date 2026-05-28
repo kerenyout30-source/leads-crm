@@ -1,6 +1,7 @@
 'use client'
 
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { useTheme } from 'next-themes'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { STATUS_OPTIONS } from '@/lib/constants'
 
@@ -15,6 +16,14 @@ const STATUS_COLORS: Record<string, string> = {
 type PieData = { status: string; count: number }
 
 export function StatusPieChart({ data }: { data: PieData[] }) {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
+
+  const tooltipStyle = isDark
+    ? { background: '#1e293b', border: '1px solid #334155', borderRadius: 6 }
+    : { background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 6 }
+  const textColor = isDark ? '#e2e8f0' : '#1e293b'
+
   const chartData = data.map(d => ({
     name: STATUS_OPTIONS.find(s => s.value === d.status)?.label ?? d.status,
     value: d.count,
@@ -35,11 +44,12 @@ export function StatusPieChart({ data }: { data: PieData[] }) {
               ))}
             </Pie>
             <Tooltip
-              contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 6 }}
-              labelStyle={{ color: '#e2e8f0' }}
+              contentStyle={tooltipStyle}
+              labelStyle={{ color: textColor }}
+              itemStyle={{ color: textColor }}
             />
             <Legend
-              formatter={(value) => <span style={{ color: '#e2e8f0', fontSize: 12 }}>{value}</span>}
+              formatter={(value) => <span style={{ color: textColor, fontSize: 12 }}>{value}</span>}
             />
           </PieChart>
         </ResponsiveContainer>

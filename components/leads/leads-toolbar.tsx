@@ -6,7 +6,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
 import { SavedFilters } from './saved-filters'
-import { STATUS_OPTIONS, SOURCE_OPTIONS } from '@/lib/constants'
+import { STATUS_OPTIONS, SOURCE_OPTIONS, ASSIGNED_REP_OPTIONS } from '@/lib/constants'
 import { Download, Upload, LayoutGrid, List, Plus } from 'lucide-react'
 
 type Props = {
@@ -16,6 +16,8 @@ type Props = {
   onStatusFilter: (v: string) => void
   sourceFilter: string
   onSourceFilter: (v: string) => void
+  repFilter: string
+  onRepFilter: (v: string) => void
   activePreset: string | null
   onPreset: (p: { label: string; status?: string; thisMonth?: boolean } | null) => void
   view: 'table' | 'kanban'
@@ -55,6 +57,17 @@ export function LeadsToolbar(props: Props) {
               <SelectItem value="all">כל המקורות</SelectItem>
               {SOURCE_OPTIONS.map(s => (
                 <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={props.repFilter} onValueChange={v => props.onRepFilter(v ?? '')}>
+            <SelectTrigger className="w-36 h-8 text-xs">
+              <SelectValue placeholder="נציג" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">כל הנציגים</SelectItem>
+              {ASSIGNED_REP_OPTIONS.map(r => (
+                <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>

@@ -20,28 +20,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { STATUS_OPTIONS, SOURCE_OPTIONS } from '@/lib/constants'
-import type { Lead } from '@/lib/types'
+import {
+  STATUS_OPTIONS,
+  SOURCE_OPTIONS,
+  ASSIGNED_REP_OPTIONS,
+  INTEREST_LEVEL_OPTIONS,
+} from '@/lib/constants'
 
 const schema = z.object({
-  name: z.string().min(1, 'שם הוא שדה חובה'),
-  phone: z.string().optional().or(z.literal('')),
-  email: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .refine(
-      (v) => !v || z.string().email().safeParse(v).success,
-      'אימייל לא תקין'
-    ),
+  // Required fields
+  name: z.string().trim().min(1, 'שם הוא שדה חובה'),
+  phone: z.string().trim().min(1, 'טלפון הוא שדה חובה'),
+  // Status has a default 'new', so always valid
+  status: z.enum(['new', 'in_progress', 'details_sent', 'closed', 'not_relevant']),
+  // Everything below is optional - accepts empty string or undefined
+  email: z.string().optional().or(z.literal('')),
   role_title: z.string().optional().or(z.literal('')),
   organization: z.string().optional().or(z.literal('')),
-  status: z.enum(['new', 'in_progress', 'details_sent', 'closed', 'not_relevant']),
   source: z
-    .enum(['facebook', 'referral', 'outbound', 'whatsapp', 'other'])
+    .enum(['facebook', 'referral', 'outbound', 'whatsapp', 'field_agent', 'other'])
     .optional()
     .or(z.literal('')),
   notes: z.string().optional().or(z.literal('')),
+  city: z.string().optional().or(z.literal('')),
+  assigned_rep: z
+    .enum(['yuval', 'efi', 'keren', 'alona'])
+    .optional()
+    .or(z.literal('')),
+  interest_level: z
+    .enum(['high', 'medium', 'low'])
+    .optional()
+    .or(z.literal('')),
+  follow_up_date: z.string().optional().or(z.literal('')),
+  institution_size: z.string().optional().or(z.literal('')),
 })
 
 export type LeadFormValues = z.infer<typeof schema>
@@ -53,6 +64,27 @@ type Props = {
 }
 
 export function LeadForm({ defaultValues, onSubmit, loading }: Props) {
+  // Convert null/undefined from DB to empty strings (form expects strings, not nulls)
+  const d = defaultValues ?? {}
+  const merged: LeadFormValues = {
+    name: (d.name as string | null | undefined) ?? '',
+    phone: (d.phone as string | null | undefined) ?? '',
+    email: (d.email as string | null | undefined) ?? '',
+    role_title: (d.role_title as string | null | undefined) ?? '',
+    organization: (d.organization as string | null | undefined) ?? '',
+    status: (d.status as LeadFormValues['status']) ?? 'new',
+    source: (d.source as LeadFormValues['source']) ?? '',
+    notes: (d.notes as string | null | undefined) ?? '',
+    city: (d.city as string | null | undefined) ?? '',
+    assigned_rep: (d.assigned_rep as LeadFormValues['assigned_rep']) ?? '',
+    interest_level: (d.interest_level as LeadFormValues['interest_level']) ?? '',
+    follow_up_date: (d.follow_up_date as string | null | undefined) ?? '',
+    institution_size:
+      d.institution_size != null && d.institution_size !== ''
+        ? String(d.institution_size)
+        : '',
+  }
+
   const {
     register,
     handleSubmit,
@@ -60,17 +92,7 @@ export function LeadForm({ defaultValues, onSubmit, loading }: Props) {
     setValue,
   } = useForm<LeadFormValues>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      name: '',
-      phone: '',
-      email: '',
-      role_title: '',
-      organization: '',
-      status: 'new',
-      source: '',
-      notes: '',
-      ...defaultValues,
-    },
+    defaultValues: merged,
   })
 
   return (
@@ -87,17 +109,17 @@ export function LeadForm({ defaultValues, onSubmit, loading }: Props) {
       {/* Phone and Email */}
       <div className="grid grid-cols-2 gap-3">
         <FormItem>
-          <FormLabel>טלפון</FormLabel>
+          <FormLabel>טלפון *</FormLabel>
           <FormControl>
             <Input {...register('phone')} dir="ltr" />
           </FormControl>
+          {errors.phone && <FormMessage>{errors.phone.message}</FormMessage>}
         </FormItem>
         <FormItem>
           <FormLabel>אימייל</FormLabel>
           <FormControl>
             <Input {...register('email')} dir="ltr" />
           </FormControl>
-          {errors.email && <FormMessage>{errors.email.message}</FormMessage>}
         </FormItem>
       </div>
 
@@ -122,6 +144,7 @@ export function LeadForm({ defaultValues, onSubmit, loading }: Props) {
         <FormItem>
           <FormLabel>סטטוס</FormLabel>
           <Select
+            defaultValue={merged.status}
             onValueChange={(value) =>
               setValue('status', value as LeadFormValues['status'])
             }
@@ -141,15 +164,16 @@ export function LeadForm({ defaultValues, onSubmit, loading }: Props) {
         <FormItem>
           <FormLabel>מקור</FormLabel>
           <Select
+            defaultValue={merged.source || '__none__'}
             onValueChange={(value) =>
-              setValue('source', value === '' ? '' : (value as LeadFormValues['source']))
+              setValue('source', (value === '__none__' ? '' : value) as LeadFormValues['source'])
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="בחר מקור" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">ללא</SelectItem>
+              <SelectItem value="__none__" className="text-muted-foreground italic">ללא</SelectItem>
               {SOURCE_OPTIONS.map((s) => (
                 <SelectItem key={s.value} value={s.value}>
                   {s.label}
@@ -157,6 +181,76 @@ export function LeadForm({ defaultValues, onSubmit, loading }: Props) {
               ))}
             </SelectContent>
           </Select>
+        </FormItem>
+      </div>
+
+      {/* City (full width) */}
+      <FormItem>
+        <FormLabel>עיר</FormLabel>
+        <FormControl>
+          <Input {...register('city')} />
+        </FormControl>
+      </FormItem>
+
+      {/* Assigned Rep and Interest Level */}
+      <div className="grid grid-cols-2 gap-3">
+        <FormItem>
+          <FormLabel>נציג מטפל</FormLabel>
+          <Select
+            defaultValue={merged.assigned_rep || '__none__'}
+            onValueChange={(value) =>
+              setValue('assigned_rep', (value === '__none__' ? '' : value) as LeadFormValues['assigned_rep'])
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__" className="text-muted-foreground italic">ללא</SelectItem>
+              {ASSIGNED_REP_OPTIONS.map((r) => (
+                <SelectItem key={r.value} value={r.value}>
+                  {r.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormItem>
+        <FormItem>
+          <FormLabel>רמת עניין</FormLabel>
+          <Select
+            defaultValue={merged.interest_level || '__none__'}
+            onValueChange={(value) =>
+              setValue('interest_level', (value === '__none__' ? '' : value) as LeadFormValues['interest_level'])
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__" className="text-muted-foreground italic">ללא</SelectItem>
+              {INTEREST_LEVEL_OPTIONS.map((l) => (
+                <SelectItem key={l.value} value={l.value}>
+                  {l.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormItem>
+      </div>
+
+      {/* Follow-up date and Institution size */}
+      <div className="grid grid-cols-2 gap-3">
+        <FormItem>
+          <FormLabel>תאריך Follow Up</FormLabel>
+          <FormControl>
+            <Input {...register('follow_up_date')} type="date" dir="ltr" />
+          </FormControl>
+        </FormItem>
+        <FormItem>
+          <FormLabel>גודל המוסד / מס' תלמידים</FormLabel>
+          <FormControl>
+            <Input {...register('institution_size')} type="number" min="0" dir="ltr" />
+          </FormControl>
         </FormItem>
       </div>
 

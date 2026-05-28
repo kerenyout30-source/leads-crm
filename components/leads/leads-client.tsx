@@ -7,6 +7,12 @@ import { LeadsKanban } from './leads-kanban'
 import { LeadDrawer } from './lead-drawer'
 import { ImportModal } from './import-modal'
 import type { Lead } from '@/lib/types'
+import {
+  STATUS_MAP,
+  SOURCE_MAP,
+  ASSIGNED_REP_MAP,
+  INTEREST_LEVEL_MAP,
+} from '@/lib/constants'
 import * as XLSX from 'xlsx'
 
 type Props = { initialLeads: Lead[] }
@@ -16,6 +22,7 @@ export function LeadsClient({ initialLeads }: Props) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [sourceFilter, setSourceFilter] = useState('all')
+  const [repFilter, setRepFilter] = useState('all')
   const [activePreset, setActivePreset] = useState<string | null>(null)
   const [view, setView] = useState<'table' | 'kanban'>('table')
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -33,6 +40,7 @@ export function LeadsClient({ initialLeads }: Props) {
 
       let matchStatus = statusFilter === 'all' || l.status === statusFilter
       const matchSource = sourceFilter === 'all' || l.source === sourceFilter
+      const matchRep = repFilter === 'all' || l.assigned_rep === repFilter
 
       if (activePreset === 'לידים פעילים') {
         matchStatus = ['new', 'in_progress', 'details_sent'].includes(l.status)
@@ -41,9 +49,9 @@ export function LeadsClient({ initialLeads }: Props) {
         matchStatus = new Date(l.created_at) >= startOfMonth
       }
 
-      return matchSearch && matchStatus && matchSource
+      return matchSearch && matchStatus && matchSource && matchRep
     })
-  }, [leads, search, statusFilter, sourceFilter, activePreset, startOfMonth])
+  }, [leads, search, statusFilter, sourceFilter, repFilter, activePreset, startOfMonth])
 
   function handleEdit(lead: Lead) {
     setEditingLead(lead)
@@ -62,8 +70,13 @@ export function LeadsClient({ initialLeads }: Props) {
       אימייל: l.email ?? '',
       תפקיד: l.role_title ?? '',
       מוסד: l.organization ?? '',
-      סטטוס: l.status,
-      מקור: l.source ?? '',
+      עיר: l.city ?? '',
+      סטטוס: STATUS_MAP[l.status]?.label ?? l.status,
+      מקור: l.source ? (SOURCE_MAP[l.source]?.label ?? l.source) : '',
+      'נציג מטפל': l.assigned_rep ? (ASSIGNED_REP_MAP[l.assigned_rep]?.label ?? l.assigned_rep) : '',
+      'רמת עניין': l.interest_level ? (INTEREST_LEVEL_MAP[l.interest_level]?.label ?? l.interest_level) : '',
+      'תאריך לחזור': l.follow_up_date ?? '',
+      'גודל המוסד': l.institution_size ?? '',
       הערות: l.notes ?? '',
       תאריך: new Date(l.created_at).toLocaleDateString('he-IL'),
     }))
@@ -81,6 +94,7 @@ export function LeadsClient({ initialLeads }: Props) {
         search={search} onSearch={setSearch}
         statusFilter={statusFilter} onStatusFilter={setStatusFilter}
         sourceFilter={sourceFilter} onSourceFilter={setSourceFilter}
+        repFilter={repFilter} onRepFilter={setRepFilter}
         activePreset={activePreset} onPreset={p => setActivePreset(p?.label ?? null)}
         view={view} onViewChange={setView}
         onAddNew={handleAddNew}

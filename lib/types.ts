@@ -11,7 +11,12 @@ export type Source =
   | 'referral'
   | 'outbound'
   | 'whatsapp'
+  | 'field_agent'
   | 'other'
+
+export type InterestLevel = 'high' | 'medium' | 'low'
+
+export type AssignedRep = 'yuval' | 'efi' | 'keren' | 'alona'
 
 export type Lead = {
   id: string
@@ -25,6 +30,11 @@ export type Lead = {
   source: Source | null
   notes: string | null
   user_id: string
+  city: string | null
+  assigned_rep: AssignedRep | null
+  interest_level: InterestLevel | null
+  follow_up_date: string | null
+  institution_size: number | null
 }
 
 export type LeadActivity = {
