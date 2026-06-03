@@ -1,9 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import {
   useReactTable, getCoreRowModel, getFilteredRowModel,
-  getPaginationRowModel, flexRender,
-  type ColumnDef,
+  getPaginationRowModel, getSortedRowModel, flexRender,
+  type ColumnDef, type SortingState, type Column,
 } from '@tanstack/react-table'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -13,7 +14,7 @@ import { StatusBadge } from './status-badge'
 import { InterestBadge } from './interest-badge'
 import type { Lead } from '@/lib/types'
 import { SOURCE_MAP, ASSIGNED_REP_MAP } from '@/lib/constants'
-import { Pencil } from 'lucide-react'
+import { Pencil, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 function formatFollowUpDate(dateStr: string | null) {
@@ -28,21 +29,37 @@ function formatFollowUpDate(dateStr: string | null) {
   }
 }
 
+function SortableHeader({ column, title }: { column: Column<Lead, unknown>; title: string }) {
+  const sorted = column.getIsSorted()
+  return (
+    <button
+      type="button"
+      className="flex items-center gap-1 hover:text-foreground transition-colors"
+      onClick={() => column.toggleSorting(sorted === 'asc')}
+    >
+      <span>{title}</span>
+      {sorted === 'asc' && <ChevronUp className="h-3 w-3" />}
+      {sorted === 'desc' && <ChevronDown className="h-3 w-3" />}
+      {!sorted && <ChevronsUpDown className="h-3 w-3 opacity-40" />}
+    </button>
+  )
+}
+
 const columns: ColumnDef<Lead>[] = [
-  { accessorKey: 'name',         header: 'שם',     cell: ({ row }) => <span className="font-medium">{row.original.name}</span> },
-  { accessorKey: 'organization', header: 'מוסד',   cell: ({ row }) => <span className="text-muted-foreground">{row.original.organization ?? '—'}</span> },
-  { accessorKey: 'phone',        header: 'טלפון',  cell: ({ row }) => <span dir="ltr" className="text-muted-foreground">{row.original.phone ?? '—'}</span> },
-  { accessorKey: 'source',       header: 'מקור',   cell: ({ row }) => <span className="text-muted-foreground text-xs">{row.original.source ? (SOURCE_MAP[row.original.source]?.label ?? row.original.source) : '—'}</span> },
-  { accessorKey: 'status',       header: 'סטטוס',  cell: ({ row }) => <StatusBadge status={row.original.status} /> },
-  { accessorKey: 'assigned_rep', header: 'נציג',   cell: ({ row }) => <span className="text-muted-foreground text-xs">{row.original.assigned_rep ? (ASSIGNED_REP_MAP[row.original.assigned_rep]?.label ?? row.original.assigned_rep) : '—'}</span> },
-  { accessorKey: 'interest_level', header: 'עניין',  cell: ({ row }) => row.original.interest_level ? <InterestBadge level={row.original.interest_level} /> : <span className="text-muted-foreground text-xs">—</span> },
-  { accessorKey: 'follow_up_date', header: 'Follow Up',  cell: ({ row }) => {
+  { accessorKey: 'name',           header: ({ column }) => <SortableHeader column={column} title="שם" />,         cell: ({ row }) => <span className="font-medium">{row.original.name}</span> },
+  { accessorKey: 'organization',   header: ({ column }) => <SortableHeader column={column} title="מוסד" />,        cell: ({ row }) => <span className="text-muted-foreground">{row.original.organization ?? '—'}</span> },
+  { accessorKey: 'phone',          header: ({ column }) => <SortableHeader column={column} title="טלפון" />,       cell: ({ row }) => <span dir="ltr" className="text-muted-foreground">{row.original.phone ?? '—'}</span> },
+  { accessorKey: 'source',         header: ({ column }) => <SortableHeader column={column} title="מקור" />,        cell: ({ row }) => <span className="text-muted-foreground text-xs">{row.original.source ? (SOURCE_MAP[row.original.source]?.label ?? row.original.source) : '—'}</span> },
+  { accessorKey: 'status',         header: ({ column }) => <SortableHeader column={column} title="סטטוס" />,       cell: ({ row }) => <StatusBadge status={row.original.status} /> },
+  { accessorKey: 'assigned_rep',   header: ({ column }) => <SortableHeader column={column} title="נציג" />,        cell: ({ row }) => <span className="text-muted-foreground text-xs">{row.original.assigned_rep ? (ASSIGNED_REP_MAP[row.original.assigned_rep]?.label ?? row.original.assigned_rep) : '—'}</span> },
+  { accessorKey: 'interest_level', header: ({ column }) => <SortableHeader column={column} title="עניין" />,       cell: ({ row }) => row.original.interest_level ? <InterestBadge level={row.original.interest_level} /> : <span className="text-muted-foreground text-xs">—</span> },
+  { accessorKey: 'follow_up_date', header: ({ column }) => <SortableHeader column={column} title="Follow Up" />,  cell: ({ row }) => {
       const { text, overdue } = formatFollowUpDate(row.original.follow_up_date)
       return <span className={cn('text-xs', overdue ? 'text-red-600 dark:text-red-400 font-medium' : 'text-muted-foreground')}>{text}</span>
     }
   },
-  { accessorKey: 'created_at',   header: 'תאריך יצירה',  cell: ({ row }) => <span className="text-muted-foreground text-xs">{new Date(row.original.created_at).toLocaleDateString('he-IL')}</span> },
-  { id: 'actions', cell: () => null },
+  { accessorKey: 'created_at',     header: ({ column }) => <SortableHeader column={column} title="תאריך יצירה" />, cell: ({ row }) => <span className="text-muted-foreground text-xs">{new Date(row.original.created_at).toLocaleDateString('he-IL')}</span> },
+  { id: 'actions', enableSorting: false, cell: () => null },
 ]
 
 type Props = {
@@ -51,11 +68,16 @@ type Props = {
 }
 
 export function LeadsTable({ leads, onEdit }: Props) {
+  const [sorting, setSorting] = useState<SortingState>([])
+
   const table = useReactTable({
     data: leads,
     columns,
+    state: { sorting },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     initialState: { pagination: { pageSize: 25 } },
   })
