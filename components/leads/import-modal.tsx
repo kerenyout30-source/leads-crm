@@ -10,8 +10,8 @@ import { Badge } from '@/components/ui/badge'
 import { createLead } from '@/actions/leads'
 import { toast } from 'sonner'
 import { Download, AlertCircle, CheckCircle2 } from 'lucide-react'
-import type { Lead, InterestLevel, AssignedRep } from '@/lib/types'
-import { ASSIGNED_REP_OPTIONS, INTEREST_LEVEL_OPTIONS } from '@/lib/constants'
+import type { Lead, InterestLevel, AssignedRep, InstitutionType } from '@/lib/types'
+import { ASSIGNED_REP_OPTIONS, INTEREST_LEVEL_OPTIONS, INSTITUTION_TYPE_OPTIONS } from '@/lib/constants'
 
 type LeadField =
   | 'name'
@@ -25,6 +25,7 @@ type LeadField =
   | 'interest_level'
   | 'follow_up_date'
   | 'institution_size'
+  | 'institution_type'
 
 const FIELD_LABELS: Record<LeadField, string> = {
   name: 'שם',
@@ -38,6 +39,7 @@ const FIELD_LABELS: Record<LeadField, string> = {
   interest_level: 'רמת עניין',
   follow_up_date: 'תאריך לחזור',
   institution_size: 'גודל המוסד',
+  institution_type: 'סוג מוסד',
 }
 
 const COLUMN_VARIATIONS: Record<LeadField, string[]> = {
@@ -52,6 +54,7 @@ const COLUMN_VARIATIONS: Record<LeadField, string[]> = {
   interest_level: ['רמת עניין', 'עניין', 'רמה', 'interest', 'interest level', 'priority', 'level'],
   follow_up_date: ['תאריך לחזור', 'תאריך מעקב', 'תאריך חזרה', 'חזרה', 'follow up', 'followup', 'follow_up_date', 'next contact'],
   institution_size: ['גודל המוסד', 'גודל', 'מספר תלמידים', 'תלמידים', 'size', 'institution size', 'students'],
+  institution_type: ['סוג מוסד', 'סוג', 'רמת מוסד', 'סוג בית ספר', 'institution type', 'school type', 'type', 'level'],
 }
 
 function detectField(columnName: string): LeadField | null {
@@ -82,6 +85,18 @@ function parseAssignedRep(val: string): AssignedRep | null {
   for (const opt of ASSIGNED_REP_OPTIONS) {
     if (opt.label === val.trim() || opt.value === v) return opt.value
   }
+  return null
+}
+
+function parseInstitutionType(val: string): InstitutionType | null {
+  const v = val.trim().toLowerCase()
+  for (const opt of INSTITUTION_TYPE_OPTIONS) {
+    if (opt.label === val.trim() || opt.value === v) return opt.value
+  }
+  // Hebrew + English variants
+  if (['elementary', 'יסודי', 'יסוד', 'primary'].includes(v)) return 'elementary'
+  if (['middle', 'חטיבה', 'חט"ב', 'middle school'].includes(v)) return 'middle'
+  if (['high', 'תיכון', 'high school'].includes(v)) return 'high'
   return null
 }
 
@@ -132,6 +147,7 @@ export function ImportModal({ open, onClose, onImported }: Props) {
         'תפקיד': 'מנהל בית ספר',
         'מוסד': 'בית ספר אבן יהודה',
         'עיר': 'תל אביב',
+        'סוג מוסד': 'יסודי',
         'נציג מטפל': 'יובל',
         'רמת עניין': 'גבוהה',
         'תאריך לחזור': '2026-06-15',
@@ -145,6 +161,7 @@ export function ImportModal({ open, onClose, onImported }: Props) {
         'תפקיד': 'רכזת',
         'מוסד': 'עיריית רמת גן',
         'עיר': 'רמת גן',
+        'סוג מוסד': 'תיכון',
         'נציג מטפל': 'קרן',
         'רמת עניין': 'בינונית',
         'תאריך לחזור': '',
@@ -223,6 +240,11 @@ export function ImportModal({ open, onClose, onImported }: Props) {
             if (date) leadData.follow_up_date = date
             break
           }
+          case 'institution_type': {
+            const t = parseInstitutionType(strVal)
+            if (t) leadData.institution_type = t
+            break
+          }
           default:
             // string fields: name, phone, email, role_title, organization, notes, city
             ;(leadData as Record<string, string>)[field] = strVal
@@ -249,6 +271,7 @@ export function ImportModal({ open, onClose, onImported }: Props) {
           interest_level: leadData.interest_level ?? null,
           follow_up_date: leadData.follow_up_date ?? null,
           institution_size: leadData.institution_size ?? null,
+          institution_type: leadData.institution_type ?? null,
         })
         created.push(lead)
       } catch (e) {

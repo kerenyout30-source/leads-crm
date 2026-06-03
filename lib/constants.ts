@@ -1,5 +1,5 @@
 // lib/constants.ts
-import type { Status, Source, InterestLevel, AssignedRep } from './types'
+import type { Status, Source, InterestLevel, AssignedRep, InstitutionType } from './types'
 
 export const STATUS_OPTIONS: { value: Status; label: string; color: string }[] = [
   { value: 'new',          label: 'ליד חדש',       color: 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-300' },
@@ -31,6 +31,12 @@ export const ASSIGNED_REP_OPTIONS: { value: AssignedRep; label: string }[] = [
   { value: 'alona', label: 'אלונה' },
 ]
 
+export const INSTITUTION_TYPE_OPTIONS: { value: InstitutionType; label: string }[] = [
+  { value: 'elementary', label: 'יסודי' },
+  { value: 'middle',     label: 'חטיבה' },
+  { value: 'high',       label: 'תיכון' },
+]
+
 export const STATUS_MAP = Object.fromEntries(
   STATUS_OPTIONS.map(s => [s.value, s])
 ) as Record<Status, typeof STATUS_OPTIONS[0]>
@@ -46,3 +52,7 @@ export const INTEREST_LEVEL_MAP = Object.fromEntries(
 export const ASSIGNED_REP_MAP = Object.fromEntries(
   ASSIGNED_REP_OPTIONS.map(o => [o.value, o])
 ) as Record<AssignedRep, typeof ASSIGNED_REP_OPTIONS[0]>
+
+export const INSTITUTION_TYPE_MAP = Object.fromEntries(
+  INSTITUTION_TYPE_OPTIONS.map(o => [o.value, o])
+) as Record<InstitutionType, typeof INSTITUTION_TYPE_OPTIONS[0]>

@@ -12,6 +12,7 @@ import {
   SOURCE_MAP,
   ASSIGNED_REP_MAP,
   INTEREST_LEVEL_MAP,
+  INSTITUTION_TYPE_MAP,
 } from '@/lib/constants'
 import * as XLSX from 'xlsx'
 
@@ -71,6 +72,7 @@ export function LeadsClient({ initialLeads }: Props) {
       תפקיד: l.role_title ?? '',
       מוסד: l.organization ?? '',
       עיר: l.city ?? '',
+      'סוג מוסד': l.institution_type ? (INSTITUTION_TYPE_MAP[l.institution_type]?.label ?? l.institution_type) : '',
       סטטוס: STATUS_MAP[l.status]?.label ?? l.status,
       מקור: l.source ? (SOURCE_MAP[l.source]?.label ?? l.source) : '',
       'נציג מטפל': l.assigned_rep ? (ASSIGNED_REP_MAP[l.assigned_rep]?.label ?? l.assigned_rep) : '',

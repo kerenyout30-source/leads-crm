@@ -18,6 +18,8 @@ export type InterestLevel = 'high' | 'medium' | 'low'
 
 export type AssignedRep = 'yuval' | 'efi' | 'keren' | 'alona'
 
+export type InstitutionType = 'elementary' | 'middle' | 'high'
+
 export type Lead = {
   id: string
   created_at: string
@@ -35,6 +37,7 @@ export type Lead = {
   interest_level: InterestLevel | null
   follow_up_date: string | null
   institution_size: number | null
+  institution_type: InstitutionType | null
 }
 
 export type LeadActivity = {

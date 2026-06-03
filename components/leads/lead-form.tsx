@@ -25,6 +25,7 @@ import {
   SOURCE_OPTIONS,
   ASSIGNED_REP_OPTIONS,
   INTEREST_LEVEL_OPTIONS,
+  INSTITUTION_TYPE_OPTIONS,
 } from '@/lib/constants'
 
 const schema = z.object({
@@ -53,6 +54,10 @@ const schema = z.object({
     .or(z.literal('')),
   follow_up_date: z.string().optional().or(z.literal('')),
   institution_size: z.string().optional().or(z.literal('')),
+  institution_type: z
+    .enum(['elementary', 'middle', 'high'])
+    .optional()
+    .or(z.literal('')),
 })
 
 export type LeadFormValues = z.infer<typeof schema>
@@ -83,6 +88,7 @@ export function LeadForm({ defaultValues, onSubmit, loading }: Props) {
       d.institution_size != null && d.institution_size !== ''
         ? String(d.institution_size)
         : '',
+    institution_type: (d.institution_type as LeadFormValues['institution_type']) ?? '',
   }
 
   const {
@@ -139,6 +145,37 @@ export function LeadForm({ defaultValues, onSubmit, loading }: Props) {
         </FormItem>
       </div>
 
+      {/* City and Institution Type */}
+      <div className="grid grid-cols-2 gap-3">
+        <FormItem>
+          <FormLabel>עיר</FormLabel>
+          <FormControl>
+            <Input {...register('city')} />
+          </FormControl>
+        </FormItem>
+        <FormItem>
+          <FormLabel>סוג מוסד</FormLabel>
+          <Select
+            defaultValue={merged.institution_type || '__none__'}
+            onValueChange={(value) =>
+              setValue('institution_type', (value === '__none__' ? '' : value) as LeadFormValues['institution_type'])
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__" className="text-muted-foreground italic">ללא</SelectItem>
+              {INSTITUTION_TYPE_OPTIONS.map((t) => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormItem>
+      </div>
+
       {/* Status and Source */}
       <div className="grid grid-cols-2 gap-3">
         <FormItem>
@@ -183,14 +220,6 @@ export function LeadForm({ defaultValues, onSubmit, loading }: Props) {
           </Select>
         </FormItem>
       </div>
-
-      {/* City (full width) */}
-      <FormItem>
-        <FormLabel>עיר</FormLabel>
-        <FormControl>
-          <Input {...register('city')} />
-        </FormControl>
-      </FormItem>
 
       {/* Assigned Rep and Interest Level */}
       <div className="grid grid-cols-2 gap-3">

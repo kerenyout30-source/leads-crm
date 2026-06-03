@@ -51,6 +51,7 @@ export function LeadDrawer({ open, onClose, lead, onSaved, onDeleted }: Props) {
         institution_size: values.institution_size
           ? Number(values.institution_size)
           : null,
+        institution_type: values.institution_type || null,
       }
 
       if (lead) {
