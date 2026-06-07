@@ -70,7 +70,7 @@ type Props = {
 export function LeadsTable({ leads, onEdit }: Props) {
   const [sorting, setSorting] = useState<SortingState>([])
 
-  const columnsWithClick = columns.map(col =>
+  const columnsWithClick = columns.map((col: any) =>
     col.accessorKey === 'name'
       ? {
           ...col,
