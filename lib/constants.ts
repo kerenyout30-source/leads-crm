@@ -26,7 +26,7 @@ export const INTEREST_LEVEL_OPTIONS: { value: InterestLevel; label: string; colo
 
 export const ASSIGNED_REP_OPTIONS: { value: AssignedRep; label: string }[] = [
   { value: 'yuval', label: 'יובל' },
-  { value: 'efi',   label: 'אפי' },
+  { value: 'Effi', label: 'אפי' },
   { value: 'keren', label: 'קרן' },
   { value: 'alona', label: 'אלונה' },
 ]

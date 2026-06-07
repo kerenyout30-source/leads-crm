@@ -16,7 +16,7 @@ export type Source =
 
 export type InterestLevel = 'high' | 'medium' | 'low'
 
-export type AssignedRep = 'yuval' | 'efi' | 'keren' | 'alona'
+export type AssignedRep = 'yuval' | 'Effi' | 'keren' | 'alona'
 
 export type InstitutionType = 'elementary' | 'middle' | 'high'
 
