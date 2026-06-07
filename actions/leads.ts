@@ -9,13 +9,17 @@ export async function createLead(data: Omit<Lead, 'id' | 'created_at' | 'user_id
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
+  console.log('[createLead] Creating lead:', data)
   const { data: lead, error } = await supabase
     .from('leads')
     .insert({ ...data, user_id: user.id })
     .select()
     .single()
 
-  if (error) throw new Error(error.message)
+  if (error) {
+    console.error('[createLead] Supabase error:', error)
+    throw new Error(`Supabase error: ${error.message}`)
+  }
 
   // Log activity (don't fail if this errors - activities are secondary)
   try {
@@ -29,8 +33,15 @@ export async function createLead(data: Omit<Lead, 'id' | 'created_at' | 'user_id
     console.error('Failed to log lead creation activity:', e)
   }
 
-  revalidatePath('/leads')
-  revalidatePath('/')
+  try {
+    console.log('[createLead] Revalidating paths...')
+    revalidatePath('/leads')
+    revalidatePath('/')
+    console.log('[createLead] Paths revalidated successfully')
+  } catch (e) {
+    console.error('[createLead] revalidatePath error:', e)
+    throw e
+  }
   return lead
 }
 
@@ -45,12 +56,16 @@ export async function updateLead(
 
   // Team-shared CRM: any authenticated user can update any lead.
   // RLS in Supabase enforces that only authenticated users can perform this action.
+  console.log('[updateLead] Updating lead:', { id, data })
   const { error } = await supabase
     .from('leads')
     .update(data)
     .eq('id', id)
 
-  if (error) throw new Error(error.message)
+  if (error) {
+    console.error('[updateLead] Supabase error:', error)
+    throw new Error(`Supabase error: ${error.message}`)
+  }
 
   // Log each changed field as an activity (don't fail if this errors)
   if (changedFields.length > 0) {
@@ -68,8 +83,15 @@ export async function updateLead(
     }
   }
 
-  revalidatePath('/leads')
-  revalidatePath('/')
+  try {
+    console.log('[updateLead] Revalidating paths...')
+    revalidatePath('/leads')
+    revalidatePath('/')
+    console.log('[updateLead] Paths revalidated successfully')
+  } catch (e) {
+    console.error('[updateLead] revalidatePath error:', e)
+    throw e
+  }
 }
 
 export async function deleteLead(id: string) {

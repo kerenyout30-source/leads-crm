@@ -102,9 +102,9 @@ export function LeadDrawer({ open, onClose, lead, onSaved, onDeleted }: Props) {
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-lg overflow-y-auto"
+        className="w-full sm:max-w-lg overflow-y-auto pr-6"
       >
-        <SheetHeader className="mb-4">
+        <SheetHeader className="mb-4 pr-4">
           <SheetTitle>
             {lead ? `עריכת ליד: ${lead.name}` : 'ליד חדש'}
           </SheetTitle>

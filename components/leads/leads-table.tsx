@@ -70,9 +70,26 @@ type Props = {
 export function LeadsTable({ leads, onEdit }: Props) {
   const [sorting, setSorting] = useState<SortingState>([])
 
+  const columnsWithClick = columns.map(col =>
+    col.accessorKey === 'name'
+      ? {
+          ...col,
+          cell: ({ row }: any) => (
+            <button
+              type="button"
+              onClick={() => onEdit(row.original)}
+              className="font-medium hover:text-blue-600 hover:underline transition-colors text-left"
+            >
+              {row.original.name}
+            </button>
+          )
+        }
+      : col
+  )
+
   const table = useReactTable({
     data: leads,
-    columns,
+    columns: columnsWithClick,
     state: { sorting },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
