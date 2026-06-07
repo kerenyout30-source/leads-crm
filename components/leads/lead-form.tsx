@@ -45,7 +45,7 @@ const schema = z.object({
   notes: z.string().optional().or(z.literal('')),
   city: z.string().optional().or(z.literal('')),
   assigned_rep: z
-    .enum(['yuval', 'efi', 'keren', 'alona'])
+    .enum(['yuval', 'Effi', 'keren', 'alona'])
     .optional()
     .or(z.literal('')),
   interest_level: z
